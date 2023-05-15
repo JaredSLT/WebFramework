@@ -14,23 +14,19 @@ public class UploadScriptGenerator {
             "    ajax.open('POST', '" + path + "');" +
             "    ajax.send(formdata);" +
             "}" +
-            "" +
             "function " + name + "ProgressHandler(event) {" +
             "    document.getElementById('" + name + "Total').innerHTML = 'Uploaded ' + event.loaded + ' bytes of ' + event.total;" +
             "    var percent = (event.loaded / event.total) * 100;" +
             "    document.getElementById('" + name + "ProgressBar').value = Math.round(percent);" +
             "    document.getElementById('" + name + "Status').innerHTML = Math.round(percent) + '% uploaded... please wait';" +
             "}" +
-            "" +
             "function " + name + "CompleteHandler(event) {" +
             "    document.getElementById('" + name + "Status').innerHTML = event.target.responseText;" +
             "    document.getElementById('" + name + "ProgressBar').value = 0;" +
             "}" +
-            "" +
             "function " + name + "ErrorHandler(event) {" +
             "    document.getElementById('" + name + "Status').innerHTML = 'Upload Failed';" +
             "}" +
-            "" +
             "function " + name + "AbortHandler(event) {" +
             "    document.getElementById('" + name + "Status').innerHTML = 'Upload Aborted';" +
             "}";
@@ -38,7 +34,6 @@ public class UploadScriptGenerator {
 
     public static String getUploadImageDisplayScript(String imageSelectName, String displayName) {
         return "const image_input = document.getElementById('" + imageSelectName + "');" +
-            "" +
             "image_input.addEventListener('change', function() {" +
             "  const reader = new FileReader();" +
             "  reader.addEventListener('load', () => {" +

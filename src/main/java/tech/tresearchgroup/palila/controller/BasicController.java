@@ -15,7 +15,6 @@ import io.activej.promise.Promisable;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.tresearchgroup.cao.controller.GenericCAO;
 import tech.tresearchgroup.palila.model.BaseSettings;
 import tech.tresearchgroup.palila.model.BasicUserObjectInterface;
 import tech.tresearchgroup.palila.model.entities.*;
@@ -231,9 +230,8 @@ public class BasicController extends HttpResponses {
                                                           String[] entityPackages,
                                                           String library,
                                                           Map<String, GenericController> controllers,
-                                                          @NotNull HttpRequest httpRequest,
-                                                          GenericCAO genericCAO) throws ClassNotFoundException {
-        Class mediaClass = ReflectionMethods.findClass(mediaType, entityPackages, genericCAO);
+                                                          @NotNull HttpRequest httpRequest) throws ClassNotFoundException {
+        Class mediaClass = ReflectionMethods.findClass(mediaType, entityPackages);
         if (mediaClass != null) {
             if (varName != null) {
                 UUID uuid = UUID.randomUUID();
@@ -246,7 +244,7 @@ public class BasicController extends HttpResponses {
                 }
                 return httpRequest.handleMultipart(MultipartDecoder.MultipartDataHandler.file(fileName ->
                         ChannelFileWriter.open(newSingleThreadExecutor(), new File(library + "/" + mediaClass.getSimpleName().toLowerCase() + "/" + uuid + ".tmp").toPath())))
-                    .map($ -> finalizeUpload(mediaClass, varName, file, entityPackages, library, controllers, httpRequest, genericCAO));
+                    .map($ -> finalizeUpload(mediaClass, varName, file, entityPackages, library, controllers, httpRequest));
             }
         }
         return error();
@@ -258,13 +256,12 @@ public class BasicController extends HttpResponses {
                                         String[] entityPackages,
                                         String library,
                                         Map<String, GenericController> controllers,
-                                        HttpRequest httpRequest,
-                                        GenericCAO genericCAO) {
+                                        HttpRequest httpRequest) {
         try {
             Field field = mediaClass.getDeclaredField(varName);
             Class fieldClass = field.getType();
             if (field.getType().equals(List.class)) {
-                fieldClass = ReflectionMethods.getListClass(field, entityPackages, genericCAO);
+                fieldClass = ReflectionMethods.getListClass(field, entityPackages);
             }
             Object classObject = ReflectionMethods.getNewInstance(mediaClass);
             Method setTitle = classObject.getClass().getMethod("setTitle", String.class);

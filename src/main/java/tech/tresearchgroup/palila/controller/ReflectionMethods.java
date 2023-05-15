@@ -7,8 +7,6 @@ import j2html.tags.DomContent;
 import jdk.jshell.spi.ExecutionControl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.tresearchgroup.cao.controller.GenericCAO;
-import tech.tresearchgroup.cao.model.CacheTypesEnum;
 import tech.tresearchgroup.palila.controller.components.*;
 import tech.tresearchgroup.palila.model.BaseSettings;
 import tech.tresearchgroup.palila.model.BasicFormObject;
@@ -131,23 +129,19 @@ public class ReflectionMethods {
         return null;
     }
 
-    public static Class getListClass(Field field, String[] inPackages, GenericCAO genericCAO) {
+    public static Class getListClass(Field field, String[] inPackages) {
         try {
             ParameterizedType pt = (ParameterizedType) field.getGenericType();
             String[] parts = pt.getActualTypeArguments()[0].getTypeName().split("\\.");
             String mediaName = parts[parts.length - 1].toLowerCase();
-            return findClass(mediaName, inPackages, genericCAO);
+            return findClass(mediaName, inPackages);
         } catch (ClassNotFoundException e) {
             return null;
         }
     }
 
-    public static List<String> getEnumValues(GenericCAO genericCAO, Class theClass) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
-        List<String> stringList = (List<String>) genericCAO.read(CacheTypesEnum.STATIC, theClass.getSimpleName());
-        if (stringList != null) {
-            return stringList;
-        }
-        stringList = new LinkedList<>();
+    public static List<String> getEnumValues(Class theClass) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
+        List<String> stringList = new LinkedList<>();
         if (theClass != null) {
             Method getValues = theClass.getMethod("values");
             Object[] values = (Object[]) getValues.invoke(ReflectionMethods.getNewInstance(theClass));
@@ -156,7 +150,6 @@ public class ReflectionMethods {
                 stringList.add(StringController.toCamelCase(String.valueOf(getName.invoke(enumValue))));
             }
         }
-        genericCAO.create(CacheTypesEnum.STATIC, theClass.getSimpleName(), stringList);
         return stringList;
     }
 
@@ -170,15 +163,11 @@ public class ReflectionMethods {
         return null;
     }
 
-    public static Class findClass(String className, String[] inPackages, GenericCAO genericCAO) throws ClassNotFoundException {
+    public static Class findClass(String className, String[] inPackages) throws ClassNotFoundException {
         for (String packageName : inPackages) {
-            List<String> classNames = (List<String>) genericCAO.read(CacheTypesEnum.STATIC, packageName);
-            if (classNames == null) {
-                classNames = new LinkedList<>();
-                try (ScanResult scanResult = new ClassGraph().acceptPackages(packageName).enableClassInfo().scan()) {
-                    classNames.addAll(scanResult.getAllClasses().getNames());
-                }
-                genericCAO.create(CacheTypesEnum.STATIC, packageName, classNames);
+            List<String> classNames = new LinkedList<>();
+            try (ScanResult scanResult = new ClassGraph().acceptPackages(packageName).enableClassInfo().scan()) {
+                classNames.addAll(scanResult.getAllClasses().getNames());
             }
             for (String name : classNames) {
                 if (name.replace(packageName + ".", "").toLowerCase().equals(className)) {
@@ -189,16 +178,12 @@ public class ReflectionMethods {
         return null;
     }
 
-    public static List<String> getClassNames(String[] inPackages, GenericCAO genericCAO) {
+    public static List<String> getClassNames(String[] inPackages) {
         List<String> theClasses = new LinkedList<>();
         for (String packageName : inPackages) {
-            List<String> classNames = (List<String>) genericCAO.read(CacheTypesEnum.STATIC, packageName);
-            if (classNames == null) {
-                classNames = new LinkedList<>();
-                try (ScanResult scanResult = new ClassGraph().acceptPackages(packageName).enableClassInfo().scan()) {
-                    classNames.addAll(scanResult.getAllClasses().getNames());
-                }
-                genericCAO.create(CacheTypesEnum.STATIC, packageName, classNames);
+            List<String> classNames = new LinkedList<>();
+            try (ScanResult scanResult = new ClassGraph().acceptPackages(packageName).enableClassInfo().scan()) {
+                classNames.addAll(scanResult.getAllClasses().getNames());
             }
             theClasses.addAll(classNames);
         }
@@ -227,13 +212,7 @@ public class ReflectionMethods {
         return null;
     }
 
-    public static List<DomContent> toFormObjects(boolean editable, Object object, Class theClass, GenericCAO genericCAO) throws InvocationTargetException, IllegalAccessException, ExecutionControl.NotImplementedException, NoSuchMethodException, InstantiationException {
-        if (object == null) {
-            List<DomContent> data = (List<DomContent>) genericCAO.read(CacheTypesEnum.DOM, "form-" + theClass.getSimpleName());
-            if (data != null) {
-                return data;
-            }
-        }
+    public static List<DomContent> toFormObjects(boolean editable, Object object, Class theClass) throws InvocationTargetException, IllegalAccessException, ExecutionControl.NotImplementedException, NoSuchMethodException, InstantiationException {
         Field[] fields = theClass.getDeclaredFields();
         List<DomContent> contentList = new LinkedList<>();
         List<DomContent> sideScrollers = new LinkedList<>();
@@ -271,7 +250,7 @@ public class ReflectionMethods {
             } else if (Character.class.equals(fieldClass) || char.class.equals(fieldClass)) {
                 throw new ExecutionControl.NotImplementedException("Character object parsing from form");
             } else if (field.getType().isEnum()) {
-                List<String> enumValues = ReflectionMethods.getEnumValues(genericCAO, fieldClass);
+                List<String> enumValues = ReflectionMethods.getEnumValues(fieldClass);
                 contentList.add(AutoCompleteDropDownBoxComponent.render(editable, field.getName(), field.getName(), String.valueOf(getterData), enumValues));
             } else if (field.getType().isArray()) {
                 if (BaseSettings.debug) {
@@ -299,9 +278,6 @@ public class ReflectionMethods {
             }
         }
         contentList.addAll(sideScrollers);
-        if (object == null) {
-            genericCAO.create(CacheTypesEnum.DOM, "form-" + theClass.getSimpleName(), contentList);
-        }
         return contentList;
     }
 }

@@ -18,7 +18,7 @@ public class BaseSettings {
     public static SearchMethodEnum searchMethod;
     public static String searchHost;
     public static String searchKey;
-    public static CacheMethodEnum cacheMethodEnum;
+    public static CacheMethodEnum cacheMethodEnum = CacheMethodEnum.LOCAL;
     public static boolean cacheEnable;
 
     public static int maxAssetCacheAge;

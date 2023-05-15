@@ -48,10 +48,20 @@ public class ImageFileEntity extends BasicFormObject implements BasicObjectInter
         return created;
     }
 
+    @Override
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
     @Serialize(order = 1)
     @SerializeNullable
     public Date getUpdated() {
         return updated;
+    }
+
+    @Override
+    public void setUpdated(Date updated) {
+        this.updated = updated;
     }
 
     @Serialize(order = 2)
@@ -60,10 +70,20 @@ public class ImageFileEntity extends BasicFormObject implements BasicObjectInter
         return id;
     }
 
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     @Serialize(order = 3)
     @SerializeNullable
     public LockType getLockType() {
         return lockType;
+    }
+
+    @Override
+    public void setLockType(LockType lockType) {
+        this.lockType = lockType;
     }
 
     @Serialize(order = 4)
@@ -72,34 +92,14 @@ public class ImageFileEntity extends BasicFormObject implements BasicObjectInter
         return views;
     }
 
+    public void setViews(Long views) {
+        this.views = views;
+    }
+
     @Serialize(order = 5)
     @SerializeNullable
     public String getPath() {
         return path;
-    }
-
-    @Override
-    public void setCreated(Date created) {
-        this.created = created;
-    }
-
-    @Override
-    public void setUpdated(Date updated) {
-        this.updated = updated;
-    }
-
-    @Override
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    @Override
-    public void setLockType(LockType lockType) {
-        this.lockType = lockType;
-    }
-
-    public void setViews(Long views) {
-        this.views = views;
     }
 
     public void setPath(String path) {
