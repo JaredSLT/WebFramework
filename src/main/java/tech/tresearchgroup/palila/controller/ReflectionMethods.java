@@ -7,7 +7,7 @@ import j2html.tags.DomContent;
 import jdk.jshell.spi.ExecutionControl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.tresearchgroup.palila.controller.components.*;
+import tech.tresearchgroup.palila.controller.html.components.*;
 import tech.tresearchgroup.palila.model.BaseSettings;
 import tech.tresearchgroup.palila.model.BasicFormObject;
 import tech.tresearchgroup.palila.model.Card;

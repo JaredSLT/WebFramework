@@ -1,0 +1,101 @@
+package tech.tresearchgroup.palila.controller.html.components;
+
+import j2html.tags.DomContent;
+import tech.tresearchgroup.palila.model.BaseSettings;
+
+import java.util.List;
+import java.util.Objects;
+
+import static j2html.TagCreator.*;
+
+public class AutoCompleteDropDownBoxComponent {
+    public static String render(boolean editable, String title, String name, String selected, List<String> values) {
+        if (selected == null) {
+            selected = "";
+        }
+        if (BaseSettings.renderer.equals("j2html")) {
+            return renderHTMLFlow(editable, title, name, selected, values);
+        }
+        return renderJ2HTML(editable, title, name, selected, values).render();
+    }
+
+    public static String render(boolean editable, String title, String value, String name, String endpoint) {
+        if (BaseSettings.renderer.equals("j2html")) {
+            return renderHTMLFlow(editable, title, value, name, endpoint);
+        }
+        return renderJ2HTML(editable, title, value, name, endpoint).render();
+    }
+
+    private static DomContent renderJ2HTML(boolean editable, String title, String name, String selected, List<String> values) {
+        if (selected == null) {
+            selected = "";
+        }
+        String finalSelected = selected;
+        return iffElse(editable,
+            span(
+                br(),
+                label(title).withClass("subLabel"),
+                br(),
+                input().withName(name).withList(name + "-data"),
+                datalist(
+                    each(values, value ->
+                        iffElse(Objects.equals(value.toLowerCase(), finalSelected.toLowerCase()),
+                            option(value).isSelected(),
+                            option(value)
+                        )
+                    )
+                ).withId(name + "-data")
+            ),
+            iff(!finalSelected.equals("") && !finalSelected.equals("null"),
+                span(
+                    br(),
+                    label(title).withClass("subLabel"),
+                    br(),
+                    input().withName(name).withValue(finalSelected)
+                )
+            )
+        );
+    }
+
+    private static String renderHTMLFlow(boolean editable, String title, String name, String selected, List<String> values) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        return stringBuilder.toString();
+    }
+
+    public static DomContent renderJ2HTML(boolean editable, String title, String value, String name, String endpoint) {
+        return html(
+            iffElse(editable,
+                iffElse(value != null && !value.equals("") && !value.equals("null"),
+                    html(
+                        br(),
+                        label(title).withClass("subLabel"),
+                        br(),
+                        input().withType("text").attr("onKeyUp", "showResults(this.value, '" + endpoint + "', '" + name + "')").withValue(value),
+                        div().withId(name)
+                    ),
+                    html(
+                        br(),
+                        label(title).withClass("subLabel"),
+                        br(),
+                        input().withType("text").attr("onKeyUp", "showResults(this.value, '" + endpoint + "', '" + name + "')"),
+                        div().withId(name)
+                    )
+                ),
+                iff(value != null && !value.equals("") && !value.equals("null"),
+                    html(
+                        br(),
+                        label(title).withClass("subLabel"),
+                        br(),
+                        input().withType("text").attr("onKeyUp", "showResults(this.value, '" + endpoint + "', '" + name + "')").withValue(value),
+                        div().withId(name)
+                    )
+                )
+            )
+        );
+    }
+
+    public static String renderHTMLFlow(boolean editable, String title, String value, String name, String endpoint) {
+
+    }
+}

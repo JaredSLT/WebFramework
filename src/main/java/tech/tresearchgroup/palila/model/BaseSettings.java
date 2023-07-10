@@ -36,4 +36,5 @@ public class BaseSettings {
     public static String baseLibraryPath;
     public static int cardWidth;
     public static int chunk = 1024 * 2048;
+    public static String renderer = "htmlflow";
 }
