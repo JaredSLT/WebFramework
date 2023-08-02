@@ -4,15 +4,20 @@ import htmlflow.HtmlFlow;
 import j2html.tags.DomContent;
 import org.xmlet.htmlapifaster.EnumTypeInputType;
 import tech.tresearchgroup.palila.model.BaseSettings;
+import tech.tresearchgroup.palila.model.enums.RendererEnum;
 
 import static j2html.TagCreator.*;
 
 public class AccordionComponent {
-    private static String render(String id, String text, String content) {
-        if (BaseSettings.renderer.equals("j2html")) {
-            return renderHTMLFlow(id, text, content);
-        }
-        return renderJ2HTML(id, text, content).render();
+    public static String render(String id, String text, String content, RendererEnum rendererEnum) {
+        return switch (rendererEnum) {
+            case J2HTML -> renderJ2HTML(id, text, content).render();
+            default -> renderHTMLFlow(id, text, content);
+        };
+    }
+
+    public static String render(String id, String text, String content) {
+        return render(id, text, content, BaseSettings.renderer);
     }
 
     private static DomContent renderJ2HTML(String id, String text, String content) {
@@ -32,7 +37,8 @@ public class AccordionComponent {
         StringBuilder stringBuilder = new StringBuilder();
         HtmlFlow.doc(stringBuilder).div().attrClass("accordion")
             .input().attrId(id).attrType(EnumTypeInputType.RADIO).attrName("accordion-radio").attrHidden(true).__()
-            .label().text(i().withClass("fas fa-arrow-alt-circle-down").withText(text)).attrClass("accordion-header c-hand").attrFor(id).__()
+            .label()
+            .text(i().withClass("fas fa-arrow-alt-circle-down").withText(text)).attrClass("accordion-header c-hand").attrFor(id).__()
             .div().attrClass("accordion-body").text(content).__();
         return stringBuilder.toString();
     }

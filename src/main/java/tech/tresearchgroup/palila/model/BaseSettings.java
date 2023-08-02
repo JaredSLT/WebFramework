@@ -3,6 +3,7 @@ package tech.tresearchgroup.palila.model;
 import tech.tresearchgroup.cao.model.CacheMethodEnum;
 import tech.tresearchgroup.dao.model.DatabaseTypeEnum;
 import tech.tresearchgroup.palila.model.enums.CompressionMethodEnum;
+import tech.tresearchgroup.palila.model.enums.RendererEnum;
 import tech.tresearchgroup.sao.model.SearchMethodEnum;
 
 public class BaseSettings {
@@ -36,5 +37,5 @@ public class BaseSettings {
     public static String baseLibraryPath;
     public static int cardWidth;
     public static int chunk = 1024 * 2048;
-    public static String renderer = "htmlflow";
+    public static RendererEnum renderer = RendererEnum.HTMLFLOW;
 }

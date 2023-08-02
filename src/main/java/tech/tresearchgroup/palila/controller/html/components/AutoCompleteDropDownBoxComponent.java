@@ -1,7 +1,15 @@
 package tech.tresearchgroup.palila.controller.html.components;
 
+import htmlflow.HtmlFlow;
+import htmlflow.HtmlPage;
 import j2html.tags.DomContent;
+import org.xmlet.htmlapifaster.Div;
+import org.xmlet.htmlapifaster.EnumTypeInputType;
+import org.xmlet.htmlapifaster.Label;
+import org.xmlet.htmlapifaster.Span;
+import tech.tresearchgroup.palila.controller.HTMLFlowController;
 import tech.tresearchgroup.palila.model.BaseSettings;
+import tech.tresearchgroup.palila.model.enums.RendererEnum;
 
 import java.util.List;
 import java.util.Objects;
@@ -9,21 +17,21 @@ import java.util.Objects;
 import static j2html.TagCreator.*;
 
 public class AutoCompleteDropDownBoxComponent {
-    public static String render(boolean editable, String title, String name, String selected, List<String> values) {
+    public static String render(boolean editable, String title, String name, String selected, List<String> values, RendererEnum rendererEnum) {
         if (selected == null) {
             selected = "";
         }
-        if (BaseSettings.renderer.equals("j2html")) {
+        if (BaseSettings.renderer.equals(RendererEnum.HTMLFLOW)) {
             return renderHTMLFlow(editable, title, name, selected, values);
         }
-        return renderJ2HTML(editable, title, name, selected, values).render();
+        return switch (rendererEnum) {
+            case J2HTML -> renderJ2HTML(editable, title, name, selected, values).render();
+            default -> renderHTMLFlow(editable, title, name, selected, values);
+        };
     }
 
-    public static String render(boolean editable, String title, String value, String name, String endpoint) {
-        if (BaseSettings.renderer.equals("j2html")) {
-            return renderHTMLFlow(editable, title, value, name, endpoint);
-        }
-        return renderJ2HTML(editable, title, value, name, endpoint).render();
+    public static String render(boolean editable, String title, String name, String selected, List<String> values) {
+        return render(editable, title, name, selected, values, BaseSettings.renderer);
     }
 
     private static DomContent renderJ2HTML(boolean editable, String title, String name, String selected, List<String> values) {
@@ -59,7 +67,24 @@ public class AutoCompleteDropDownBoxComponent {
 
     private static String renderHTMLFlow(boolean editable, String title, String name, String selected, List<String> values) {
         StringBuilder stringBuilder = new StringBuilder();
-
+        if(editable) {
+            String list = HTMLFlowController.dataListConverter(name + "-data", values, selected, HtmlFlow.doc(stringBuilder).div());
+            Label<Span<Div<HtmlPage>>> data = HtmlFlow.doc(stringBuilder).div()
+                .span()
+                    .br().__()
+                .label().text(title).attrClass("subLabel")
+                .br().__()
+                .input().attrName(name).attrList(name + "-data").__()
+                .text(list);
+        } else {
+            if(!selected.equals("") && !selected.equals("null")) {
+                HtmlFlow.doc(stringBuilder).div().span()
+                    .br().__()
+                    .label().attrTitle(title).attrClass("subLabel").__()
+                    .br().__()
+                    .input().attrName(name).attrValue(selected);
+            }
+        }
         return stringBuilder.toString();
     }
 
@@ -96,6 +121,32 @@ public class AutoCompleteDropDownBoxComponent {
     }
 
     public static String renderHTMLFlow(boolean editable, String title, String value, String name, String endpoint) {
-
+        StringBuilder stringBuilder = new StringBuilder();
+        if(editable) {
+            if(value != null && !value.equals("") && !value.equals("null")) {
+                HtmlFlow.doc(stringBuilder).div()
+                    .br().__()
+                    .label().attrTitle(title).attrClass("subLabel")
+                    .br().__()
+                    .input().attrType(EnumTypeInputType.TEXT).addAttr("onKeyUp", "showResults(this.value, '" + endpoint + "', '" + name + "')").attrValue(value).__()
+                    .__().div().attrId(name);
+            } else {
+                HtmlFlow.doc(stringBuilder).div()
+                    .br().__()
+                    .label().attrTitle(title).attrClass("subLabel")
+                    .br().__()
+                    .input().attrType(EnumTypeInputType.TEXT).addAttr("onKeyUp", "showResults(this.value, '" + endpoint + "', '" + name + "')");
+            }
+        } else {
+            if(value != null && !value.equals("") && !value.equals("null")) {
+                HtmlFlow.doc(stringBuilder).div()
+                    .br().__()
+                    .label().attrTitle(title).attrClass("subLabel")
+                    .br().__()
+                    .input().attrType(EnumTypeInputType.TEXT).addAttr("onKeyUp", "showResults(this.value, '" + endpoint + "', '" + name + "')").attrValue(value).__()
+                    .__().div().attrId(name);
+            }
+        }
+        return stringBuilder.toString();
     }
 }
